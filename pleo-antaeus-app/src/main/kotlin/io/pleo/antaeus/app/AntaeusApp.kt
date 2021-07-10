@@ -8,6 +8,7 @@
 package io.pleo.antaeus.app
 
 import getPaymentProvider
+import io.pleo.antaeus.core.cron.BillingScheduler
 import io.pleo.antaeus.core.services.BillingService
 import io.pleo.antaeus.core.services.CustomerService
 import io.pleo.antaeus.core.services.InvoiceService
@@ -21,9 +22,13 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.quartz.*
+import org.quartz.impl.StdSchedulerFactory
 import setupInitialData
 import java.io.File
+import java.lang.Thread.sleep
 import java.sql.Connection
+
 
 fun main() {
     // The tables to create in the database.
@@ -63,11 +68,12 @@ fun main() {
     // This is _your_ billing service to be included where you see fit
     val billingService = BillingService(paymentProvider = paymentProvider, invoiceService = invoiceService)
 
-//    BillingScheduler(billingService = billingService)
-
+    // initialize billing scheduler
+    BillingCronConfig().initialize(billingService)
     // Create REST web service
     AntaeusRest(
         invoiceService = invoiceService,
         customerService = customerService
     ).run()
+
 }

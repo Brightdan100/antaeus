@@ -9,15 +9,12 @@ import io.pleo.antaeus.models.InvoiceStatus
 import mu.KotlinLogging
 import java.lang.Thread.sleep
 
-private val logger = KotlinLogging.logger {}
-
 class BillingService(private val paymentProvider: PaymentProvider, private val invoiceService: InvoiceService) {
     private val maxTries = 3
+    private val logger = KotlinLogging.logger {}
 
     fun chargePendingInvoices() {
-        for (invoice in invoiceService.fetchAllPendingInvoices()) {
-            chargeInvoice(invoice)
-        }
+        invoiceService.fetchAllPendingInvoices().forEach { invoice -> chargeInvoice(invoice) }
     }
 
     private fun chargeInvoice(invoice: Invoice, tries: Int = maxTries) {
