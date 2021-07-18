@@ -86,3 +86,19 @@ The code given is structured as follows. Feel free however to modify the structu
 * [Sqlite3](https://sqlite.org/index.html) - Database storage engine
 
 Happy hacking 😁!
+
+
+## Implementation Doc
+
+### Billing Service
+* chargePendingInvoices -> Fetches all the pending invoices in  the store and sends them one after the other to chargeInvoice to charge
+* chargeInvoice -> This method tries to charge a pending invoice 
+    * if invoice charge is successful then update the invoice status to paid
+    * if there is a client error like CustomerNotFoundException or CurrencyMismatchException, log the exception (and also add a reporting system like sentry because this kind of error should not happen and its occurrence needs to be investigated)
+    * if a network error occurs from the payment provider, retry after a particular time, because this could be a normal timeout or temporary downtime on the payment providers system (A metric can also be added here to monitor the payment providers error rate/type to know when we can switch to another payment provider)
+    
+*Other Suggestions: When sending the invoices to be charged, we can make use of a queuing system - to prevent one process from impeding the others. Based on the requirement, adding another status (say Error?) might be a good decision to track charge failures in the system as well as to help build a robust and idempotent retry mechanism for such transactions*
+
+### Billing Cron
+* The BillingScheduler is the entry point of the cron
+* The BillingCronConfig houses the cron configuration (including the config to run the cron on the first of every month). The config can be made more generic such that we can easily add other crons which might be added to the service)
