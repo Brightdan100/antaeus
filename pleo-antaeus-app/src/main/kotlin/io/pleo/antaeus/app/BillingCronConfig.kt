@@ -12,7 +12,7 @@ class BillingCronConfig {
                 .build()
         job1.jobDataMap["billingService"] = billingService
         val trigger1: Trigger = TriggerBuilder.newTrigger()
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * 1/1 * ? *"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 9 1 1/1 ? *"))
                 .build()
         val scheduler1: Scheduler = StdSchedulerFactory().getScheduler()
         scheduler1.start()
